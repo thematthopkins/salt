@@ -24,7 +24,7 @@ from salt.version import __version__
 log = logging.getLogger(__name__)
 
 
-def get_pillar(opts, grains, id_, saltenv=None, ext=None, env=None):
+def get_pillar(opts, grains, id_, saltenv=None, ext=None, env=None, functions=None):
     '''
     Return the correct pillar driver based on the file_client option
     '''
@@ -37,11 +37,10 @@ def get_pillar(opts, grains, id_, saltenv=None, ext=None, env=None):
         # Backwards compatibility
         saltenv = env
 
-    return {
-            'remote': RemotePillar,
-            'local': Pillar
-            }.get(opts['file_client'], Pillar)(opts, grains, id_, saltenv, ext)
-
+    if opts['file_client'] == 'remote':
+        return RemotePillar(opts, grains, id_, saltenv, ext)
+    else:
+        return Pillar(opts, grains, id_, saltenv, ext, functions)
 
 class RemotePillar(object):
     '''
